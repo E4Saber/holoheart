@@ -6,11 +6,12 @@ import numpy as np
 import time
 import threading
 import queue
+import os
 from collections import deque
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pyaudio
-import pyttsx3
+from TTS.api import TTS
 try:
     import librosa
 except ImportError:
@@ -20,10 +21,26 @@ except ImportError:
 class AudioService:
     """音频服务类，处理音频输入输出和语音处理"""
 
-    def __init__(self):
-        """初始化音频服务"""
+    def __init__(self, tts_model_name="tts_models/zh-CN/baker/tacotron2-DDC-GST"):
+        """初始化音频服务
+
+        Args:
+            tts_model_name (str): TTS模型名称，默认使用中文模型
+        """
         # 初始化TTS引擎
-        self.tts_engine = pyttsx3.init()
+        try:
+            # 使用🐸TTS替代pyttsx3
+            self.tts_engine = TTS(model_name=tts_model_name, progress_bar=False)
+            print(f"TTS引擎初始化成功，使用模型: {tts_model_name}")
+        except Exception as e:
+            print(f"TTS引擎初始化失败: {e}，尝试使用默认模型")
+            try:
+                # 尝试使用默认模型
+                self.tts_engine = TTS(progress_bar=False)
+                print("TTS引擎初始化成功，使用默认模型")
+            except Exception as e:
+                print(f"TTS引擎初始化失败: {e}")
+                raise
         
         # 初始化语音活动检测组件
         self.vad = SimpleVAD()
@@ -34,6 +51,9 @@ class AudioService:
         # 状态控制
         self.is_listening = False
         self.conversation_active = False
+        
+        # 音频输出配置
+        self.output_path = "temp_audio.wav"
         
     def start_listening(self) -> None:
         """开始监听音频输入"""
@@ -190,8 +210,31 @@ class AudioService:
         Args:
             text (str): 要转换为语音的文本
         """
-        self.tts_engine.say(text)
-        self.tts_engine.runAndWait()
+        try:
+            # 使用🐸TTS生成音频
+            wav = self.tts_engine.tts(text=text, speaker=None, language=None)
+            
+            # 🐸TTS已经处理了音频播放，不需要额外的播放代码
+            # 如果需要自定义播放，可以保存并播放
+            import soundfile as sf
+            import sounddevice as sd
+            
+            # 保存音频到临时文件
+            sf.write(self.output_path, wav, self.tts_engine.synthesizer.output_sample_rate)
+            
+            # 播放音频
+            data, fs = sf.read(self.output_path)
+            sd.play(data, fs)
+            sd.wait()  # 等待音频播放完成
+            
+            # 清理临时文件
+            try:
+                os.remove(self.output_path)
+            except:
+                pass
+                
+        except Exception as e:
+            print(f"语音合成失败: {e}")
     
     def speak_with_pauses(self, text: str, emotional_state: Optional[str] = None) -> None:
         """处理带停顿的语音合成
@@ -229,9 +272,28 @@ class AudioService:
         
         # 开始语音合成，添加停顿
         for segment, pause in segments:
-            self.tts_engine.say(segment)
-            self.tts_engine.runAndWait()
-            time.sleep(pause) # 控制停顿时长
+            if segment.strip():  # 确保段落不为空
+                try:
+                    # 使用🐸TTS生成音频
+                    wav = self.tts_engine.tts(text=segment, speaker=None, language=None)
+                    
+                    # 播放音频
+                    import soundfile as sf
+                    import sounddevice as sd
+                    
+                    # 保存音频到临时文件
+                    sf.write(self.output_path, wav, self.tts_engine.synthesizer.output_sample_rate)
+                    
+                    # 播放音频
+                    data, fs = sf.read(self.output_path)
+                    sd.play(data, fs)
+                    sd.wait()  # 等待音频播放完成
+                    
+                except Exception as e:
+                    print(f"语音合成失败: {e}")
+                
+                # 等待指定的停顿时间
+                time.sleep(pause)
 
 
 class SimpleVAD:

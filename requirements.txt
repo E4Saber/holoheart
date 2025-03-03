@@ -1,0 +1,22 @@
+# 基础依赖
+numpy>=1.22.0
+pyaudio>=0.2.11
+librosa>=0.9.2
+sqlite3>=2.6.0
+
+# 音频处理
+sounddevice>=0.4.4
+webrtcvad>=2.0.10
+soundfile>=0.10.3
+
+# TTS语音合成
+TTS>=0.17.0
+
+# 向量存储与检索（可选，用于高级功能）
+# pymilvus>=2.1.0
+# faiss-cpu>=1.7.2
+
+# 其他工具
+scipy>=1.8.0
+scikit-learn>=1.0.2
+matplotlib>=3.5.1
