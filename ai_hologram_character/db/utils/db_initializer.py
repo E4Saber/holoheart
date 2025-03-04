@@ -49,7 +49,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='初始化AI全息角色系统数据库')
-    parser.add_argument('--db_path', type=str, default='db/i_memory.db',
+    parser.add_argument('--db_path', type=str, default='db/holoheart.db',
                         help='数据库文件路径')
     parser.add_argument('--schema_path', type=str, default=None,
                         help='Schema文件路径')

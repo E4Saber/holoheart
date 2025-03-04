@@ -2,12 +2,8 @@
 -- 用户多维特详细征表（通过交互记录更新）
 CREATE TABLE user_profile (
     user_id TEXT PRIMARY KEY,                 -- 用户唯一标识符
-    voice_print_id TEXT,                      -- 用户声纹ID 初期唯一ID
+    voice_print_id TEXT                       -- 用户声纹ID 初期唯一ID
     -- face_print_id TEXT,                       -- 用户人脸ID
-    -- 基本信息1
-    external_info_id TEXT,                    -- 关联基本特征信息ID
-    -- 基本信息2
-    internal_info_id TEXT,                    -- 关联内部特征信息ID
 );
 
 -- 用户基本信息表
@@ -47,7 +43,7 @@ CREATE TABLE internal_info (
     social_behavior TEXT,                     -- 社交行为（包含社交技巧，人际交往方式，社交圈子等）
     -- 内在特征
     emotional_traits TEXT,                    -- 情感特征（包含情绪稳定性，敏感度等）
-    personality TEXT,                         -- 自我认知，身份认同，人生目标，价值观体系等
+    personality TEXT                          -- 自我认知，身份认同，人生目标，价值观体系等
 );
 
 -- 目前保留
@@ -85,7 +81,7 @@ CREATE TABLE interaction (
 -- 角色交互记录关系表（交互记录与用户：一对多）
 CREATE TABLE interaction_user (
     interaction_id TEXT,                      -- 交互记录ID
-    user_id TEXT,                             -- 用户ID
+    user_id TEXT                              -- 用户ID
 );
 
 -- 记忆表（未压缩 支持多种记忆类型和检索）
@@ -99,8 +95,7 @@ CREATE TABLE memory (
     importance_score REAL,                    -- 记忆重要性评分（0-1）
     emotion_type TEXT NOT NULL,               -- 情感类型（如喜悦、悲伤、愤怒等）
     emotion_intensity REAL NOT NULL,          -- 情感强度（0-1）
-    emotion_trigger TEXT,                     -- 情感触发因素
-    created_at TEXT NOT NULL                  -- 记忆创建时间（ISO8601格式）
+    emotion_trigger TEXT                      -- 情感触发因素
 );
 
 -- 记忆表（压缩 支持多种记忆类型和检索）
