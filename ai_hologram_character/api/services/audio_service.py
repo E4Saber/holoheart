@@ -462,3 +462,35 @@ class SpeakerRecognition:
             # 更新现有模型 (简单平均，实际应有更复杂的更新方法)
             new_features = self.extract_features(audio_data)
             self.speaker_db[speaker_id] = 0.7 * self.speaker_db[speaker_id] + 0.3 * new_features
+
+# 测试音频服务
+if __name__ == "__main__":
+    # 测试音频服务
+    audio_service = AudioService()
+    audio_service.start_listening()
+    
+    # 模拟音频输入
+    import sounddevice as sd
+    import time
+    fs = 16000
+    duration = 5.0  # 5秒
+    audio_data = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype='float32')
+    sd.wait()
+    
+    # 检测说话人
+    speaker_id = audio_service.identify_speaker(audio_data)
+    print(f"识别到说话人: {speaker_id}")
+    
+    # # 更新说话人模型
+    # audio_service.update_speaker_model(speaker_id, audio_data)
+    
+    # # 语音合成
+    # text = "你好，我是AI助手"
+    # audio_service.speak(text)
+    
+    # # 带停顿的语音合成
+    # text = "你好，我是AI助手。我可以回答你的问题，还可以讲笑话。"
+    # audio_service.speak_with_pauses(text)
+    
+    # # 停止监听
+    # audio_service.stop_listening()
