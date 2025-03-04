@@ -282,3 +282,7 @@ class MemoryManager:
             self.user_profiles_cache[user_id] = current_profile
         
         return success
+
+if __name__ == "__main__":
+    # 测试
+    memory_manager = MemoryManager(MemoryRepository(), UserRepository(), VectorRepository())

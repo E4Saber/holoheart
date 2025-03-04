@@ -1,0 +1,39 @@
+{
+    "ParticipantsProfiles": [
+    {
+        "id": "用户特征记录的唯一标识符，使用提供的字符串",
+        "nickname": "用户昵称",
+        "name": "用户姓名",
+        "gender": "用户性别",
+        "age": "用户年龄",
+        "birth_date": "出生日期（YYYY-MM-DD格式）",
+        "telephone": "电话号码",
+        "address": "地址",
+        "mail": "邮箱",
+        "nationality": "国籍",
+        "ethnicity": "民族",
+        "birthplace": "出生地",
+        "education": "教育程度",
+        "marry_status": "婚姻状况",
+        "political_status": "政治面貌",
+        "identity_background": "背景概述 → 需要高度文字概括，不要分层",
+        "career_summary": "职业经历",
+        "family_status": "家庭状况",
+        "social_status": "社会地位",
+        "health_status": "健康状况",
+        "physical_features": "体貌特征（包含外貌特征[身高体重等]，穿着打扮等） → 需要高度文字概括，不要分层",
+        "expression_style": "表达方式（包含语言表达，肢体语言，面部表情等方面的习惯性行为） → 需要高度文字概括，不要分层",
+        "social_behavior": "社交行为（社交技巧、人际交往方式、社交圈子等） → 需要高度文字概括，不要分层",
+        "emotional_traits": "情感特征（情绪稳定性、敏感度等） → 需要高度文字概括，不要分层",
+        "personality": "自我认知，身份认同，人生目标，价值观体系等 → 需要高度文字概括，不要分层"
+    }],
+    
+    "InteractionSummary": {
+        "user_intent": "用户意图 → 需要高度文字概括，不要分层",
+        "context_summary": "对话信息 → 需要高度文字概括，不要分层",
+        "emotion_type": "情感变化（如喜悦 → 悲伤 → 愤怒等）",
+        "emotion_intensity": "各情感类型强度（0-1之间的浮点数）",
+        "emotion_trigger": "情感触发因素 → 需要高度文字概括，不要分层"
+    }
+    
+}

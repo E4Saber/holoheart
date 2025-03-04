@@ -1,0 +1,54 @@
+{
+    "conversation_intervention_conditions": [
+      {
+        "id": 1,
+        "name": "natural_pause",
+        "description": "当前发言者停顿或似乎已完成表达"
+      },
+      {
+        "id": 2,
+        "name": "direct_question",
+        "description": "有人向你提问或请求你的意见"
+      },
+      {
+        "id": 3,
+        "name": "relevant_expertise",
+        "description": "讨论进入你熟悉的领域，你能提供有价值信息"
+      },
+      {
+        "id": 4,
+        "name": "information_gap",
+        "description": "对话中出现明显的信息缺失或错误需要补充或纠正"
+      },
+      {
+        "id": 5,
+        "name": "natural_topic_transition",
+        "description": "当前话题自然结束，可以引入新方向"
+      },
+      {
+        "id": 6,
+        "name": "inclusive_atmosphere",
+        "description": "对话氛围轻松开放，鼓励多人参与"
+      },
+      {
+        "id": 7,
+        "name": "nonverbal_cues",
+        "description": "观察到其他人通过眼神或肢体语言邀请你加入"
+      },
+      {
+        "id": 8,
+        "name": "balance_participation",
+        "description": "一个人发言时间过长，可以适当参与平衡对话"
+      },
+      {
+        "id": 9,
+        "name": "cultural_context",
+        "description": "考虑文化背景对插话礼仪的影响，避免因文化差异产生误解"
+      },
+      {
+        "id": 10,
+        "name": "emotional_tone",
+        "description": "在情绪化或敏感话题中，插话需更加谨慎，避免加剧冲突"
+      }
+    ]
+}
