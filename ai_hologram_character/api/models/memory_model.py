@@ -10,13 +10,17 @@ from dataclasses import dataclass
 @dataclass
 class Memory:
     """记忆模型类"""
-    id: str
-    summary: str
+    memory_id: str
+    context_summary: str
     content_text: str
+    is_compressed: int
+    milvus_id: str
+    embedding_dimensions: str
     importance_score: float
+    emotion_type: str
+    emotion_intensity: float
+    emotion_trigger: str
     created_at: str
-    embedding_dimensions: Optional[str] = None
-    milvus_id: Optional[str] = None
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Memory':
@@ -29,13 +33,17 @@ class Memory:
             Memory: 模型实例
         """
         return cls(
-            id=data.get('id', ''),
-            summary=data.get('summary', ''),
+            memory_id=data.get('memory_id', ''),
+            context_summary=data.get('context_summary', ''),
             content_text=data.get('content_text', ''),
+            is_compressed=data.get('is_compressed', 0),
+            milvus_id=data.get('milvus_id', ''),
+            embedding_dimensions=data.get('embedding_dimensions', '[]'),
             importance_score=data.get('importance_score', 0.0),
-            created_at=data.get('created_at', datetime.now().isoformat()),
-            embedding_dimensions=data.get('embedding_dimensions'),
-            milvus_id=data.get('milvus_id')
+            emotion_type=data.get('emotion_type', ''),
+            emotion_intensity=data.get('emotion_intensity', 0.0),
+            emotion_trigger=data.get('emotion_trigger', ''),
+            created_at=data.get('created_at', datetime.now().isoformat())
         )
     
     def to_dict(self) -> Dict[str, Any]:
@@ -45,91 +53,47 @@ class Memory:
             Dict[str, Any]: 字典表示
         """
         return {
-            'id': self.id,
-            'summary': self.summary,
+            'memory_id': self.memory_id,
+            'context_summary': self.context_summary,
             'content_text': self.content_text,
-            'importance_score': self.importance_score,
-            'created_at': self.created_at,
+            'is_compressed': self.is_compressed,
+            'milvus_id': self.milvus_id,
             'embedding_dimensions': self.embedding_dimensions,
-            'milvus_id': self.milvus_id
-        }
-
-
-@dataclass
-class CompressedMemory:
-    """压缩记忆模型类"""
-    id: str
-    summary: str
-    content_text_compressed: str
-    importance_score: float
-    created_at: str
-    original_memory_id: Optional[str] = None
-    milvus_id: Optional[str] = None
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'CompressedMemory':
-        """从字典创建模型实例
-
-        Args:
-            data (Dict[str, Any]): 字典数据
-
-        Returns:
-            CompressedMemory: 模型实例
-        """
-        return cls(
-            id=data.get('id', ''),
-            summary=data.get('summary', ''),
-            content_text_compressed=data.get('content_text_compressed', ''),
-            importance_score=data.get('importance_score', 0.0),
-            created_at=data.get('created_at', datetime.now().isoformat()),
-            original_memory_id=data.get('original_memory_id'),
-            milvus_id=data.get('milvus_id')
-        )
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典
-
-        Returns:
-            Dict[str, Any]: 字典表示
-        """
-        return {
-            'id': self.id,
-            'summary': self.summary,
-            'content_text_compressed': self.content_text_compressed,
             'importance_score': self.importance_score,
-            'created_at': self.created_at,
-            'original_memory_id': self.original_memory_id,
-            'milvus_id': self.milvus_id
+            'emotion_type': self.emotion_type,
+            'emotion_intensity': self.emotion_intensity,
+            'emotion_trigger': self.emotion_trigger,
+            'created_at': self.created_at
         }
 
 
 @dataclass
-class SentenceEmbedding:
+class Sentence:
     """句子向量模型类"""
-    id: str
+    sentence_id: str
     memory_id: str
     sentence_index: int
     sentence_text: str
+    milvus_id: str
     embedding_dimensions: str
-    milvus_id: Optional[str] = None
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'SentenceEmbedding':
+    def from_dict(cls, data: Dict[str, Any]) -> 'Sentence':
         """从字典创建模型实例
 
         Args:
             data (Dict[str, Any]): 字典数据
 
         Returns:
-            SentenceEmbedding: 模型实例
+            Sentence: 模型实例
         """
         return cls(
-            id=data.get('id', ''),
+            sentence_id=data.get('sentence_id', ''),
             memory_id=data.get('memory_id', ''),
             sentence_index=data.get('sentence_index', 0),
             sentence_text=data.get('sentence_text', ''),
-            embedding_dimensions=data.get('embedding_dimensions', '[]'),
-            milvus_id=data.get('milvus_id')
+            milvus_id=data.get('milvus_id', ''),
+            embedding_dimensions=data.get('embedding_dimensions', '[]')
         )
     
     def to_dict(self) -> Dict[str, Any]:
@@ -139,10 +103,10 @@ class SentenceEmbedding:
             Dict[str, Any]: 字典表示
         """
         return {
-            'id': self.id,
+            'sentence_id': self.sentence_id,
             'memory_id': self.memory_id,
             'sentence_index': self.sentence_index,
             'sentence_text': self.sentence_text,
-            'embedding_dimensions': self.embedding_dimensions,
-            'milvus_id': self.milvus_id
+            'milvus_id': self.milvus_id,
+            'embedding_dimensions': self.embedding_dimensions
         }

@@ -7,6 +7,8 @@ from openai import OpenAI
 import json
 import os
 
+from api.ai_client.kimi_client import KimiClient
+
 
 def build_analysis_prompt(dialogue_text: str, options: Dict[str, Any] = None) -> str:
     """构建分析提示
@@ -99,14 +101,16 @@ if __name__ == "__main__":
       "additional_context": "这是用户第一次使用系统，助手正在尝试建立初步关系。"
   }
 
-  client = OpenAI(
-          api_key="sk-g3jJGGOJkboTfsPJUIQo2V7oFI0iSkZmiVCydF1jGU2zA5Dp",#os.getenv("MOONSHOT_API_KEY"),
-          base_url="http://127.0.0.1:9988/v1" #os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
-          )
+#   client = OpenAI(
+#           api_key="sk-g3jJGGOJkboTfsPJUIQo2V7oFI0iSkZmiVCydF1jGU2zA5Dp",#os.getenv("MOONSHOT_API_KEY"),
+#           base_url="http://127.0.0.1:9988/v1" #os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
+#           )
+  
+  kimiClient = KimiClient()
   
   try:
       # 使用OpenAI客户端调用API
-      completion = client.chat.completions.create(
+      completion = kimiClient.client.chat.completions.create(
           model="kimi-latest",
           messages=[
               {"role": "system", "content": "你是一个专业的对话分析助手，擅长结构化分析对话内容并提取关键信息。请严格按照要求的JSON格式输出结果。"},

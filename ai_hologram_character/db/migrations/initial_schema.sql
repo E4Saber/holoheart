@@ -2,7 +2,7 @@
 -- 用户多维特详细征表（通过交互记录更新）
 CREATE TABLE user_profile (
     user_id TEXT PRIMARY KEY,                 -- 用户唯一标识符
-    voice_print_id TEXT                       -- 用户声纹ID 初期唯一ID
+    voice_print_id TEXT  NOT NULL             -- 用户声纹ID 初期唯一ID
     -- face_print_id TEXT,                       -- 用户人脸ID
 );
 
@@ -14,7 +14,7 @@ CREATE TABLE external_info (
     name TEXT,                                -- 用户姓名
     gender TEXT,                              -- 用户性别
     age INTEGER,                              -- 用户年龄
-    birth_date TEXT,                          -- 出生日期（YYYY-MM-DD格式）
+    birthday TEXT,                            -- 出生日期（YYYY-MM-DD格式）
     telephone TEXT,                           -- 联系电话
     address TEXT,                             -- 联系地址
     mail TEXT,                                -- 电子邮箱
@@ -87,15 +87,16 @@ CREATE TABLE interaction_user (
 -- 记忆表（未压缩 支持多种记忆类型和检索）
 CREATE TABLE memory (
     memory_id TEXT PRIMARY KEY,               -- 记忆唯一标识符
-    summary TEXT,                             -- 交互上下文信息[梗概内容：主题，人物等]
-    content_text TEXT,                        -- 记忆内容（详细对话文本）
-    is_compressed INTEGER,                    -- 是否压缩（0-未压缩，1-压缩）
-    milvus_id TEXT,                           -- 记忆向量ID
-    embedding_dimensions TEXT,                -- 对话整体向量嵌入
-    importance_score REAL,                    -- 记忆重要性评分（0-1）
+    context_summary TEXT NOT NULL,            -- 交互上下文信息[梗概内容：主题，人物等]
+    content_text TEXT NOT NULL,               -- 记忆内容（详细对话文本）
+    is_compressed INTEGER NOT NULL,           -- 是否压缩（0-未压缩，1-压缩）
+    milvus_id TEXT NOT NULL,                  -- 记忆向量ID
+    embedding_dimensions TEXT NOT NULL,       -- 对话整体向量嵌入
+    importance_score REAL NOT NULL,           -- 记忆重要性评分（0-1）
     emotion_type TEXT NOT NULL,               -- 情感类型（如喜悦、悲伤、愤怒等）
     emotion_intensity REAL NOT NULL,          -- 情感强度（0-1）
-    emotion_trigger TEXT                      -- 情感触发因素
+    emotion_trigger TEXT  NOT NULL,           -- 情感触发因素
+    created_at TEXT NOT NULL                  -- 记忆创建时间（ISO8601格式）
 );
 
 -- 记忆表（压缩 支持多种记忆类型和检索）
@@ -112,11 +113,11 @@ CREATE TABLE memory (
 -- 句子向量表（记录句子向量和上下文增强向量）
 CREATE TABLE sentence (
     sentence_id TEXT PRIMARY KEY,             -- 句子向量唯一标识符
-    memory_id TEXT,                           -- 关联记忆ID
-    sentence_index INTEGER,                   -- 句子在对话中的位置
-    sentence_text TEXT,                       -- 句子文本
-    milvus_id TEXT,                           -- 句子向量ID
-    embedding_dimensions TEXT                 -- 句子向量
+    memory_id TEXT NOT NULL,                  -- 关联记忆ID
+    sentence_index INTEGER NOT NULL,          -- 句子在对话中的位置
+    sentence_text TEXT NOT NULL,              -- 句子文本
+    milvus_id TEXT NOT NULL,                  -- 句子向量ID
+    embedding_dimensions TEXT NOT NULL        -- 句子向量
 );
 
 -- 创建索引
