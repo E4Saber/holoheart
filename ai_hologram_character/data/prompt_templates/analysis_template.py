@@ -7,7 +7,7 @@ from openai import OpenAI
 import json
 import os
 
-from api.ai_client.kimi_client import KimiClient
+from ai_hologram_character.api.ai_client.kimi_client import KimiClient
 
 
 def build_analysis_prompt(dialogue_text: str, options: Dict[str, Any] = None) -> str:
@@ -65,7 +65,7 @@ def build_analysis_prompt(dialogue_text: str, options: Dict[str, Any] = None) ->
 
     请注意：
     - 严格按照提供的JSON模板填写
-    - 对于无法推断的内容属性不必返回，直接省略掉相应的字段
+    - 没有内容的字段以及无法推断的字段需要省略掉
     - 所有置信度值应为0到1之间的小数
     - 请确保所有字段都有合理的值，对于无法确定的内容可以提供低置信度的猜测
     """

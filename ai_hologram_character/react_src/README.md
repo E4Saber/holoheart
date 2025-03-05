@@ -1,54 +1,100 @@
-# React + TypeScript + Vite
+# AI Hologram Character Chat Interface
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a React-based chat interface for the AI Hologram Character project. It provides a modern chat UI with streaming responses and integrates with the Kimi API.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 💬 Modern chat interface similar to ChatGPT and other AI assistants
+- ⚡ Real-time streaming responses
+- 📱 Responsive design that works on desktop and mobile
+- 🧠 Integration with the AI memory system
+- 🔄 Message history management
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Node.js 18.x or higher
+- npm or yarn
+- Kimi API key
+
+### Installation
+
+1. Clone the repository and navigate to the project directory:
+
+```bash
+cd ai_hologram_character/react_src
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Install dependencies:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm install
 ```
+
+3. Create a `.env.local` file in the project root:
+
+```bash
+cp .env.example .env.local
+```
+
+4. Edit `.env.local` and add your Kimi API key:
+
+```
+VITE_KIMI_API_KEY=your-actual-kimi-api-key
+```
+
+### Development
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+This will start the application at `http://localhost:5173`.
+
+### Building for Production
+
+Build the application for production:
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist` directory, which you can serve using any static file server.
+
+## Project Structure
+
+- `/src/components/ChatInterface.jsx` - The main chat interface component
+- `/src/services/kimiApiService.js` - Service for interacting with the Kimi API
+- `/src/config/env.js` - Environment configuration
+- `/src/App.tsx` - Main application component
+
+## Customization
+
+### Styling
+
+The interface uses Tailwind CSS for styling. You can customize the appearance by editing the classes in the components.
+
+### API Integration
+
+The application is set up to use the Kimi API, but you can modify the `kimiApiService.js` file to work with other API providers if needed.
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| VITE_KIMI_API_KEY | Your Kimi API key | *(required)* |
+| VITE_KIMI_BASE_URL | The base URL for the Kimi API | https://api.moonshot.cn/v1 |
+| VITE_API_TIMEOUT | Timeout for API requests in milliseconds | 30000 |
+| VITE_ENABLE_STREAMING | Enable/disable streaming responses | true |
+| VITE_DEBUG | Enable/disable debug mode | false |
+
+## Integration with Memory System
+
+The chat interface is designed to work with the AI memory system from the main project. The system maintains context between interactions and provides personalized experiences based on past conversations.
+
+## License
+
+MIT
