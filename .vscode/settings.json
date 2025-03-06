@@ -1,10 +1,22 @@
+// {
+//     "python.defaultInterpreterPath": "${workspaceFolder}\\.holo_venv\\Scripts\\python.exe",
+//     "python.terminal.activateEnvironment": true,
+//     "terminal.integrated.profiles.windows": {
+//         "Project Environment": {
+//             "source": "PowerShell",
+//             "args": ["-NoExit", "-Command", ". '${workspaceFolder}\\.holo_venv\\Scripts\\Activate.ps1'"]
+//         }
+//     },
+//     "terminal.integrated.defaultProfile.windows": "Project Environment"
+// }
+
 {
-    "python.defaultInterpreterPath": "${workspaceFolder}\\.holo_venv\\Scripts\\python.exe",
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.holo_venv_work\\Scripts\\python.exe",
     "python.terminal.activateEnvironment": true,
     "terminal.integrated.profiles.windows": {
         "Project Environment": {
             "source": "PowerShell",
-            "args": ["-NoExit", "-Command", ". '${workspaceFolder}\\.holo_venv\\Scripts\\Activate.ps1'"]
+            "args": ["-NoExit", "-Command", ". '${workspaceFolder}\\.holo_venv_work\\Scripts\\Activate.ps1'"]
         }
     },
     "terminal.integrated.defaultProfile.windows": "Project Environment"

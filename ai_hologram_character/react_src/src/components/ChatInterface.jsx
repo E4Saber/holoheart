@@ -1,15 +1,22 @@
 // src/components/ChatInterface.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import KimiApiService from '../services/kimiApiService';
+import KimiApiServiceOnline from '../services/kimiApiService_online';
+import ReactMarkdown from 'react-markdown';
 import { config } from '../config/env';
 import './ChatInterface.css';
 
 // 正确实例化 KimiApiService
-const kimiApi = new KimiApiService(config.api.apiKey, config.api.baseUrl);
+// const kimiApi = new KimiApiService(config.api.apiKey, config.api.baseUrl);
+const kimiApi = new KimiApiServiceOnline(config.api.apiKey, config.api.baseUrl);
 
 const ChatInterface = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    const savedMessages = localStorage.getItem('chatMessages');
+    return savedMessages ? JSON.parse(savedMessages) : [];
+  });
   const [inputText, setInputText] = useState('');
+  const [lastChunk, setLastChunk] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
@@ -22,8 +29,13 @@ const ChatInterface = () => {
   const inputRef = useRef(null);
 
   useEffect(() => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
     scrollToBottom();
-  }, [messages, currentStreamingMessage]);
+  }, [messages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [currentStreamingMessage]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -51,6 +63,12 @@ const ChatInterface = () => {
     setRetryCount(0);
   };
 
+  // 清除聊天历史
+  const clearChatHistory = () => {
+    setMessages([]);
+    localStorage.removeItem('chatMessages');
+  };
+
   // 获取历史消息
   const getMessageHistory = () => {
     // 获取最近的10条消息作为上下文
@@ -60,6 +78,28 @@ const ChatInterface = () => {
       role: msg.role,
       content: msg.content
     }));
+  };
+
+  const handleNewChunk = (chunk, fullResponse) => {
+    setLastChunk(chunk);
+    setCurrentStreamingMessage(fullResponse);
+  };
+
+  const renderStreamingContent = () => {
+    if (!currentStreamingMessage) return null;
+    
+    // 如果有新chunk，将其高亮显示
+    if (lastChunk) {
+      const mainContent = currentStreamingMessage.slice(0, -lastChunk.length);
+      return (
+        <>
+          <ReactMarkdown>{mainContent}</ReactMarkdown>
+          <span className="highlight-chunk">{lastChunk}</span>
+        </>
+      );
+    }
+    
+    return <ReactMarkdown>{currentStreamingMessage}</ReactMarkdown>;
   };
 
   const handleSendMessage = async () => {
@@ -86,9 +126,7 @@ const ChatInterface = () => {
       const response = await kimiApi.streamChatCompletion(
         messageText,
         history,
-        (partialResponse, fullResponse) => {
-          setCurrentStreamingMessage(fullResponse);
-        }
+        handleNewChunk 
       );
   
       setMessages(prev => [
@@ -135,6 +173,17 @@ const ChatInterface = () => {
           <h1 className="header-title">AI Hologram Character</h1>
           <p className="header-subtitle">Powered by AI memory system</p>
         </div>
+        {messages.length > 0 && (
+          <button 
+            className="clear-history-button" 
+            onClick={clearChatHistory}
+            title="清除聊天历史"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="message-container">
@@ -161,7 +210,13 @@ const ChatInterface = () => {
                     : 'assistant-message'
               }`}
             >
-              <div className="message-content">{message.content}</div>
+              {message.role === 'user' ? (
+                <div className="message-content">{message.content}</div>
+              ) : (
+                <div className="message-content">
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                </div>
+              )}
               <div className={`message-timestamp ${message.role === 'user' ? 'user-timestamp' : 'assistant-timestamp'}`}>
                 {formatTimestamp(message.timestamp)}
               </div>
@@ -171,15 +226,13 @@ const ChatInterface = () => {
 
         {isStreaming && (
           <div className="message-wrapper assistant-message-wrapper">
-            <div className="message-bubble assistant-message">
-              <div className="message-content">{currentStreamingMessage}</div>
+            <div className="message-bubble assistant-message streaming-message">
+              <div className="message-content">
+                {renderStreamingContent()}
+                <span className="cursor"></span>
+              </div>
               <div className="message-typing">
-                <div className="typing-text">Typing</div>
-                <div className="typing-animation">
-                  <span className="dot dot1"></span>
-                  <span className="dot dot2"></span>
-                  <span className="dot dot3"></span>
-                </div>
+                {/* ... */}
               </div>
             </div>
           </div>
