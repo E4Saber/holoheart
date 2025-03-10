@@ -10,7 +10,7 @@
 import time
 import threading
 import random
-from dialogue_intervention_engine import create_dialogue_engine
+from ai_hologram_character.engine.dialogue_intervention_engine import create_dialogue_engine
 
 
 class SimpleChatbot:
