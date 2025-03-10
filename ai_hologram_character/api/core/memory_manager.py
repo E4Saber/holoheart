@@ -6,67 +6,80 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
+from api.data_access.interaction_repository import InteractionRepository
 from api.data_access.memory_repository import MemoryRepository
-from api.data_access.user_repository import UserRepository
-from api.data_access.vector_repository import VectorRepository
+from ai_hologram_character.api.data_access.sentence_repository import SentenceRepository
+from ai_hologram_character.api.data_access.user_profile_repository import UserRepository
+
+from ai_hologram_character.data.schema.memory_schema import MemorySchema
 
 
 class MemoryManager:
     """记忆管理器类，处理记忆的生命周期管理"""
     
-    def __init__(self, memory_repo: MemoryRepository, user_repo: UserRepository, 
-                 vector_repo: VectorRepository):
+    def __init__(self, interaction_repo: InteractionRepository,
+                 memory_repo: MemoryRepository,
+                 sentence_repo: SentenceRepository,
+                 user_repo: UserRepository):
         """初始化记忆管理器
 
         Args:
+            interaction_repo (InteractionRepository): 交互仓库
             memory_repo (MemoryRepository): 记忆仓库
+            sentence_repo (SentenceRepository): 句子仓库
             user_repo (UserRepository): 用户仓库
-            vector_repo (VectorRepository): 向量仓库
         """
+        self.interaction_repo = interaction_repo
         self.memory_repo = memory_repo
+        self.sentence_repo = sentence_repo
         self.user_repo = user_repo
-        self.vector_repo = vector_repo
         
         # 内存缓存
         self.recent_memories = []
         self.user_profiles_cache = {}
     
-    def add_memory(self, content_text: str, context: Dict[str, Any]) -> str:
+    def add_memory(self, content_text: str) -> str:
         """添加新记忆
 
         Args:
             content_text (str): 记忆内容文本
-            context (Dict[str, Any]): 上下文信息
 
         Returns:
             str: 新创建的记忆ID
         """
-        # 生成记忆摘要
-        summary = self._generate_summary(content_text)
+        # memory_id 由SQLite自增表维护
+        memory_id = self.memory_repo.generate_id()
+
+        # 生成记忆摘要 使用API直接生成/调用本地NLP生成
+        # summary = self._generate_summary(content_text)
         
-        # 计算重要性评分
-        importance_score = self._calculate_importance(content_text, context)
+        # 计算重要性评分 由API直接生成/调用本地NLP生成
+        # importance_score = self._calculate_importance(content_text)
+
+        # 生成记忆维度，调用NLP模型生成
+        embedding_dimensions = self._generate_embedding(content_text)
         
         # 创建记忆数据
-        memory_data = {
-            'summary': summary,
-            'content_text': content_text,
-            'importance_score': importance_score
+        memory_data: MemorySchema = {
+            "id": memory_id,
+            "context_summary": context_summary,
+            "content_text": content_text,
+            "is_compressed": False,
+            "milvus_id": memory_id,                                 # 用于存储向量的ID 使用和当前memory_id相同的值
+            "embedding_dimensions": embedding_dimensions,           # 占位符，实际应存储向量值，由于
+            "importance_score": importance_score,
+            "emotion_type": None,
+            "emotion_intensity": None,
+            "emotion_trigger": None,
+            "created_at": datetime.now().isoformat()
         }
         
         # 将记忆存储到数据库
         memory_id = self.memory_repo.create_memory(memory_data)
         
-        # 如果上下文中包含用户ID，建立用户-记忆关联
-        if 'user_id' in context:
-            self.user_repo.create_user_memory(context['user_id'], memory_id)
-        elif 'speaker_id' in context:
-            self.user_repo.create_user_memory(context['speaker_id'], memory_id)
-        
-        # 如果上下文中包含参与者信息，建立参与者-记忆关联
-        if 'participants' in context and isinstance(context['participants'], list):
-            for participant_id in context['participants']:
-                self.memory_repo.create_memory_participant(memory_id, participant_id)
+        # 如果上下文中包含参与者信息，建立参与者-记忆关联（这里通过交互记录和记忆的关联区别？）
+        if '参与者名' in content_text:
+            print("发现参与者信息，建立关联")
         
         # 创建记忆的向量表示
         self._create_memory_vectors(memory_id, content_text)
@@ -75,26 +88,12 @@ class MemoryManager:
         self.recent_memories.append({
             'id': memory_id,
             'content': content_text,
-            'timestamp': datetime.now().isoformat()
         })
-        if len(self.recent_memories) > 10:  # 保持缓存大小
+
+        if len(self.recent_memories) > 10:  # 保持缓存大小（如果硬件条件允许，考虑保留3天左右的记忆内容？）
             self.recent_memories.pop(0)
         
         return memory_id
-    
-    def _generate_summary(self, content_text: str) -> str:
-        """生成记忆内容的摘要
-
-        Args:
-            content_text (str): 记忆内容文本
-
-        Returns:
-            str: 生成的摘要
-        """
-        # 简单实现：取前50个字符加省略号
-        if len(content_text) > 50:
-            return content_text[:50] + "..."
-        return content_text
     
     def _calculate_importance(self, content_text: str, context: Dict[str, Any]) -> float:
         """计算记忆的重要性评分
@@ -117,36 +116,6 @@ class MemoryManager:
         importance = min(base_score + keyword_score, 1.0)
         
         return importance
-    
-    def _create_memory_vectors(self, memory_id: str, content_text: str) -> None:
-        """为记忆内容创建向量表示
-
-        Args:
-            memory_id (str): 记忆ID
-            content_text (str): 记忆内容文本
-        """
-        # TODO: 实现真实的向量化逻辑
-        # 这里应该调用向量化模型，将文本转换为向量
-        
-        # 简单拆分句子
-        sentences = content_text.split('。')
-        
-        for i, sentence in enumerate(sentences):
-            if not sentence.strip():
-                continue
-                
-            # 创建句子向量
-            sentence_data = {
-                'memory_id': memory_id,
-                'sentence_index': i,
-                'sentence_text': sentence,
-                'embedding_dimensions': "[]"  # 占位符，实际应存储向量值
-            }
-            
-            sentence_id = self.vector_repo.create_sentence_embedding(sentence_data)
-            
-            # 创建句子-记忆关联
-            self.vector_repo.create_sentence_memory(memory_id, sentence_id)
     
     def get_memory(self, memory_id: str) -> Optional[Dict[str, Any]]:
         """获取记忆
@@ -212,33 +181,33 @@ class MemoryManager:
         # 暂时使用全文搜索代替
         return self.memory_repo.search_memories_by_text(query, limit)
     
-    def compress_memory(self, memory_id: str) -> str:
-        """压缩记忆
+    # def compress_memory(self, memory_id: str) -> str:
+    #     """压缩记忆
 
-        Args:
-            memory_id (str): 要压缩的记忆ID
+    #     Args:
+    #         memory_id (str): 要压缩的记忆ID
 
-        Returns:
-            str: 压缩后的记忆ID
-        """
-        # 获取原始记忆
-        memory = self.memory_repo.get_memory(memory_id)
-        if not memory:
-            raise ValueError(f"未找到ID为{memory_id}的记忆")
+    #     Returns:
+    #         str: 压缩后的记忆ID
+    #     """
+    #     # 获取原始记忆
+    #     memory = self.memory_repo.get_memory(memory_id)
+    #     if not memory:
+    #         raise ValueError(f"未找到ID为{memory_id}的记忆")
         
-        # 生成压缩内容（实际应用中可能使用LLM总结）
-        compressed_content = self._generate_summary(memory.get('content_text', ''))
+    #     # 生成压缩内容（实际应用中可能使用LLM总结）
+    #     compressed_content = self._generate_summary(memory.get('content_text', ''))
         
-        # 创建压缩记忆
-        compressed_data = {
-            'summary': memory.get('summary', ''),
-            'content_text_compressed': compressed_content,
-            'original_memory_id': memory_id,
-            'importance_score': memory.get('importance_score', 0.5)
-        }
+    #     # 创建压缩记忆
+    #     compressed_data = {
+    #         'summary': memory.get('summary', ''),
+    #         'content_text_compressed': compressed_content,
+    #         'original_memory_id': memory_id,
+    #         'importance_score': memory.get('importance_score', 0.5)
+    #     }
         
-        # 存储压缩记忆
-        return self.memory_repo.create_compressed_memory(compressed_data)
+    #     # 存储压缩记忆
+    #     return self.memory_repo.create_compressed_memory(compressed_data)
     
     def get_user_profile(self, user_id: str) -> Optional[Dict[str, Any]]:
         """获取用户资料
@@ -285,4 +254,4 @@ class MemoryManager:
 
 if __name__ == "__main__":
     # 测试
-    memory_manager = MemoryManager(MemoryRepository(), UserRepository(), VectorRepository())
+    memory_manager = MemoryManager(InteractionRepository(), MemoryRepository(), SentenceRepository(), UserRepository())

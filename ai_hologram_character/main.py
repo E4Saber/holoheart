@@ -11,8 +11,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from api.data_access.database_manager import DatabaseManager
 from api.data_access.memory_repository import MemoryRepository
-from api.data_access.user_repository import UserRepository
-from api.data_access.vector_repository import VectorRepository
+from ai_hologram_character.api.data_access.user_profile_repository import UserRepository
+from ai_hologram_character.api.data_access.sentence_repository import VectorRepository
 
 from api.services.audio_service import AudioService
 from api.services.emotion_service import EmotionService

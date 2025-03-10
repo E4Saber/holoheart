@@ -96,3 +96,24 @@ class DatabaseManager:
         else:
             self.commit()
         self.close()
+    
+    # 生成自增ID
+    def generate_id(self) -> int:
+        """生成自增ID，用于交互表和记忆表的相关ID
+
+        Returns:
+            int: 新ID
+        """
+        sql = "INSERT INTO id_generator_a DEFAULT VALUES"
+        self.db_manager.execute(sql)
+        return self.db_manager.cursor.lastrowid
+    
+    def generate_id(self) -> int:
+        """生成自增ID，用于句子表的相关ID
+
+        Returns:
+            int: 新ID
+        """
+        sql = "INSERT INTO id_generator_b DEFAULT VALUES"
+        self.db_manager.execute(sql)
+        return self.db_manager.cursor.lastrowid

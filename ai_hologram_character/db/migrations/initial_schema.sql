@@ -1,14 +1,14 @@
 -- 用户基础表
 -- 用户多维特详细征表（通过交互记录更新）
 CREATE TABLE user_profile (
-    user_id TEXT PRIMARY KEY,                 -- 用户唯一标识符
-    voice_print_id TEXT  NOT NULL             -- 用户声纹ID 初期唯一ID
+    user_id INTEGER PRIMARY KEY,              -- 用户唯一标识符
+    voice_print_id TEXT                       -- 用户声纹ID 初期唯一ID（但是对于对话内容抽取出来的用户是没有声纹的）
     -- face_print_id TEXT,                       -- 用户人脸ID
 );
 
 -- 用户基本信息表
 CREATE TABLE external_info (
-    user_id TEXT PRIMARY KEY,                 -- 用户唯一标识符
+    user_id INTEGER PRIMARY KEY,              -- 用户唯一标识符
     -- 基本信息（姓名，年龄，出生，国籍，民族，籍贯）
     nickname TEXT,                            -- 用户昵称
     name TEXT,                                -- 用户姓名
@@ -17,7 +17,7 @@ CREATE TABLE external_info (
     birthday TEXT,                            -- 出生日期（YYYY-MM-DD格式）
     telephone TEXT,                           -- 联系电话
     address TEXT,                             -- 联系地址
-    mail TEXT,                                -- 电子邮箱
+    email TEXT,                                -- 电子邮箱
     nationality TEXT,                         -- 国籍
     ethnicity TEXT,                           -- 民族
     birthplace TEXT,                          -- 籍贯
@@ -34,7 +34,7 @@ CREATE TABLE external_info (
 
 -- 用户内部信息表
 CREATE TABLE internal_info (
-    user_id TEXT PRIMARY KEY,                 -- 用户ID
+    user_id INTEGER PRIMARY KEY,              -- 用户ID
     -- 健康状况
     health_status TEXT,                       -- 健康状况
     -- 外在特征
@@ -69,8 +69,8 @@ CREATE TABLE internal_info (
 
 -- 交互记录表
 CREATE TABLE interaction (
-    id TEXT PRIMARY KEY,                      -- 交互记录ID
-    memory_id TEXT,                           -- 关联记忆ID[1对1]
+    interaction_id INTEGER PRIMARY KEY,       -- 交互记录ID
+    memory_id INTEGER,                        -- 关联记忆ID[1对1]
     user_intent TEXT,                         -- 用户意图
     context_summary TEXT,                     -- 交互上下文信息[梗概内容]
     -- 交互环境信息，记录交互发生的环境上下文，增强情境感知能力
@@ -80,18 +80,18 @@ CREATE TABLE interaction (
 
 -- 角色交互记录关系表（交互记录与用户：一对多）
 CREATE TABLE interaction_user (
-    interaction_id TEXT,                      -- 交互记录ID
-    user_id TEXT                              -- 用户ID
+    interaction_id INTEGER,                   -- 交互记录ID
+    user_id INTEGER                           -- 用户ID
 );
 
 -- 记忆表（未压缩 支持多种记忆类型和检索）
 CREATE TABLE memory (
-    memory_id TEXT PRIMARY KEY,               -- 记忆唯一标识符
+    memory_id INTEGER PRIMARY KEY,            -- 记忆唯一标识符
     context_summary TEXT NOT NULL,            -- 交互上下文信息[梗概内容：主题，人物等]
     content_text TEXT NOT NULL,               -- 记忆内容（详细对话文本）
     is_compressed INTEGER NOT NULL,           -- 是否压缩（0-未压缩，1-压缩）
-    milvus_id TEXT NOT NULL,                  -- 记忆向量ID
-    embedding_dimensions TEXT NOT NULL,       -- 对话整体向量嵌入
+    milvus_id INTEGER NOT NULL,               -- 记忆向量ID
+    embedding_dimensions TEXT NOT NULL,       -- 对话整体向量（基于对话梗概context_summary生成）
     importance_score REAL NOT NULL,           -- 记忆重要性评分（0-1）
     emotion_type TEXT NOT NULL,               -- 情感类型（如喜悦、悲伤、愤怒等）
     emotion_intensity REAL NOT NULL,          -- 情感强度（0-1）
@@ -105,19 +105,28 @@ CREATE TABLE memory (
 --     summary TEXT,                             -- 交互上下文信息[梗概内容]
 --     content_text_compressed TEXT,             -- 记忆内容（压缩内容）
 --     milvus_id TEXT,                           -- 记忆向量ID
---     embedding_dimensions TEXT,                -- 对话整体向量嵌入
+--     embedding_dimensions TEXT,                -- 对话整体向量
 --     importance_score REAL,                    -- 记忆重要性评分（0-1）
 --     created_at TEXT NOT NULL                  -- 记忆创建时间（ISO8601格式）
 -- );
 
--- 句子向量表（记录句子向量和上下文增强向量）
+-- 句子向量表（记录句子向量和上下文增强向量） 只存储有实际意义的内容<需要过滤机制>
 CREATE TABLE sentence (
-    sentence_id TEXT PRIMARY KEY,             -- 句子向量唯一标识符
-    memory_id TEXT NOT NULL,                  -- 关联记忆ID
-    sentence_index INTEGER NOT NULL,          -- 句子在对话中的位置
-    sentence_text TEXT NOT NULL,              -- 句子文本
-    milvus_id TEXT NOT NULL,                  -- 句子向量ID
-    embedding_dimensions TEXT NOT NULL        -- 句子向量
+    sentence_id INTEGER PRIMARY KEY,             -- 句子向量唯一标识符
+    memory_id INTEGER NOT NULL,                  -- 关联记忆ID
+    sentence_index INTEGER NOT NULL,             -- 句子在对话中的位置（0,1,2,3....N）
+    sentence_text TEXT NOT NULL,                 -- 句子文本
+    milvus_id INTEGER NOT NULL,                  -- 句子向量ID（与该行句子ID一致）
+    embedding_dimensions TEXT NOT NULL,          -- 句子向量
+    created_at TEXT NOT NULL                      -- 句子创建时间（ISO8601格式）
+);
+
+-- 自增ID管理表
+CREATE TABLE id_generator_a (
+    id INTEGER PRIMARY KEY AUTOINCREMENT         -- 自增ID（interaction_id/memory_id/milvus_id[memory]）
+);
+CREATE TABLE id_generator_b (
+    id INTEGER PRIMARY KEY AUTOINCREMENT         -- 自增ID（sentence_id/milvus_id[sentence]）
 );
 
 -- 创建索引

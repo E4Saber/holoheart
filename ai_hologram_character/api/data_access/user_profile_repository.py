@@ -30,16 +30,16 @@ class UserRepository:
         Returns:
             str: 新创建的用户ID
         """
-        user_id = user_data.get('id', str(uuid.uuid4()))
+        user_id = user_data.get('user_id', str(uuid.uuid4()))
         now = datetime.now().isoformat()
 
         # 生成SQL语句和参数
-        fields = ['id', 'last_updated']
+        fields = ['user_id', 'last_updated']
         values = [user_id, now]
         placeholders = ['?', '?']
 
         for key, value in user_data.items():
-            if key != 'id' and key != 'last_updated':
+            if key != 'user_id' and key != 'last_updated':
                 fields.append(key)
                 values.append(value)
                 placeholders.append('?')
@@ -61,7 +61,7 @@ class UserRepository:
         Returns:
             Optional[Dict[str, Any]]: 用户档案，若不存在返回None
         """
-        sql = "SELECT * FROM UserProfile WHERE id = ?"
+        sql = "SELECT * FROM UserProfile WHERE user_id = ?"
         return self.db_manager.fetch_one(sql, (user_id,))
 
     def update_user_profile(self, user_id: str, user_data: Dict[str, Any]) -> bool:
@@ -74,8 +74,6 @@ class UserRepository:
         Returns:
             bool: 更新是否成功
         """
-        # 添加最后更新时间
-        user_data['last_updated'] = datetime.now().isoformat()
         
         # 生成SET部分的SQL
         set_clause = []
@@ -91,7 +89,7 @@ class UserRepository:
         sql = f"""
         UPDATE UserProfile 
         SET {', '.join(set_clause)}
-        WHERE id = ?
+        WHERE user_id = ?
         """
         
         self.db_manager.execute(sql, tuple(values))
@@ -106,7 +104,7 @@ class UserRepository:
         Returns:
             bool: 删除是否成功
         """
-        sql = "DELETE FROM UserProfile WHERE id = ?"
+        sql = "DELETE FROM UserProfile WHERE user_id = ?"
         self.db_manager.execute(sql, (user_id,))
         return self.db_manager.cursor.rowcount > 0
 
@@ -184,7 +182,7 @@ class UserRepository:
         Returns:
             str: 新创建的隐私信息ID
         """
-        secret_id = secret_data.get('id', str(uuid.uuid4()))
+        secret_id = secret_data.get('user_id', str(uuid.uuid4()))
         now = datetime.now().isoformat()
 
         # 确保必填字段存在
@@ -194,12 +192,12 @@ class UserRepository:
                 raise ValueError(f"缺少必填字段: {field}")
 
         # 生成SQL语句和参数
-        fields = ['id', 'last_updated']
+        fields = ['user_id', 'last_updated']
         values = [secret_id, now]
         placeholders = ['?', '?']
 
         for key, value in secret_data.items():
-            if key != 'id' and key != 'last_updated':
+            if key != 'user_id' and key != 'last_updated':
                 fields.append(key)
                 values.append(value)
                 placeholders.append('?')
